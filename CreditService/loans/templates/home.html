@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Service Home</title>
+</head>
+<body>
+    <header>
+        <h1>Welcome to Credit Service</h1>
+        <nav>
+            <ul>
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'register' %}">Register</a></li>
+                <li><a href="{% url 'apply-loan' %}">Apply for Loan</a></li>
+                <li><a href="{% url 'make-payment' %}">Make Payment</a></li>
+                <li><a href="{% url 'get-statement' %}">Get Statement</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <section>
+            <h2>About Credit Service</h2>
+            <p>This is a platform to facilitate efficient lending and repayment by a Loan provider to users.</p>
+        </section>
+        
+        <section>
+            <h2>Services Offered</h2>
+            <ul>
+                <li><a href="{% url 'register' %}">Register as a User</a></li>
+                <li><a href="{% url 'apply-loan' %}">Apply for Loan</a></li>
+                <li><a href="{% url 'make-payment' %}">Make Payment</a></li>
+                <li><a href="{% url 'get-statement' %}">Get Statement</a></li>
+            </ul>
+        </section>
+    </main>
+    
+    <footer>
+        <p>&copy; 2024 Credit Service. All rights reserved.</p>
+    </footer>
+</body>
+</html>

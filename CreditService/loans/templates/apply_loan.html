@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Apply Loan</title>
+</head>
+<body>
+    <h1>Apply Loan</h1>
+    <form method="post" action="/apply-loan/">
+        {% csrf_token %}
+        <label for="unique_user_id">Unique User ID:</label>
+        <input type="text" id="unique_user_id" name="unique_user_id" required><br><br>
+        <label for="loan_type">Loan Type:</label>
+        <input type="text" id="loan_type" name="loan_type" required><br><br>
+        <label for="loan_amount">Loan Amount:</label>
+        <input type="number" id="loan_amount" name="loan_amount" required><br><br>
+        <label for="interest_rate">Interest Rate:</label>
+        <input type="number" id="interest_rate" name="interest_rate" step="0.01" required><br><br>
+        <label for="term_period">Term Period (months):</label>
+        <input type="number" id="term_period" name="term_period" required><br><br>
+        <label for="disbursement_date">Disbursement Date:</label>
+        <input type="date" id="disbursement_date" name="disbursement_date" required><br><br>
+        <button type="submit">Apply Loan</button>
+    </form>
+</body>
+</html>
