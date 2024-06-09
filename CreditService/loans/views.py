@@ -3,6 +3,7 @@ from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
 from django.views import View
 from .models import User, Loan, Payment
 import uuid
+from django.utils import timezone
 
 class RegisterUserView(View):
     def get(self, request):
@@ -10,14 +11,17 @@ class RegisterUserView(View):
 
     def post(self, request):
         data = request.POST
-        user = User.objects.create(
-            aadhar_id=data['aadhar_id'],
-            name=data['name'],
-            email=data['email'],
-            annual_income=data['annual_income'],
-            unique_user_id=uuid.uuid4()
-        )
-        return JsonResponse({'unique_user_id': str(user.unique_user_id)})
+        try:
+            user = User.objects.create(
+                aadhar_id=data.get('aadhar_id'),
+                name=data.get('name'),
+                email=data.get('email'),
+                annual_income=data.get('annual_income'),
+                unique_user_id=uuid.uuid4()
+            )
+            return JsonResponse({'unique_user_id': str(user.unique_user_id)})
+        except Exception as e:
+            return HttpResponseBadRequest(f'Failed to register user: {str(e)}')
 
 class ApplyLoanView(View):
     def get(self, request):
@@ -26,19 +30,20 @@ class ApplyLoanView(View):
     def post(self, request):
         data = request.POST
         try:
-            user = User.objects.get(unique_user_id=data['unique_user_id'])
+            user = User.objects.get(unique_user_id=data.get('unique_user_id'))
+            loan_uuid = uuid.uuid4()
             loan = Loan.objects.create(
                 user=user,
-                loan_type=data['loan_type'],
-                loan_amount=data['loan_amount'],
-                interest_rate=data['interest_rate'],
-                term_period=data['term_period'],
-                disbursement_date=data['disbursement_date'],
-                loan_id=uuid.uuid4()
+                loan_type=data.get('loan_type'),
+                loan_amount=data.get('loan_amount'),
+                interest_rate=data.get('interest_rate'),
+                term_period=data.get('term_period'),
+                disbursement_date=data.get('disbursement_date'),
+                loan_id=str(loan_uuid)
             )
-            return JsonResponse({'loan_id': str(loan.loan_id)})
-        except User.DoesNotExist:
-            return HttpResponseBadRequest('Invalid User ID')
+            return JsonResponse({'loan_id': loan.loan_id})
+        except Exception as e:
+            return HttpResponseBadRequest(f'Failed to apply for loan: {str(e)}')
 
 class MakePaymentView(View):
     def get(self, request):
@@ -46,15 +51,16 @@ class MakePaymentView(View):
 
     def post(self, request):
         data = request.POST
+        loan_id = data.get('loan_id')
         try:
-            loan = Loan.objects.get(loan_id=data['loan_id'])
+            loan = Loan.objects.get(loan_id=loan_id)
             Payment.objects.create(
                 loan=loan,
-                amount=data['amount']
+                amount=data.get('amount')
             )
             return JsonResponse({'message': 'Payment processed'})
-        except Loan.DoesNotExist:
-            return HttpResponseBadRequest('Invalid Loan ID')
+        except Exception as e:
+            return HttpResponseBadRequest(f'Failed to process payment: {str(e)}')
 
 class GetStatementView(View):
     def get(self, request):
@@ -67,14 +73,15 @@ class GetStatementView(View):
 
         try:
             loan = Loan.objects.get(loan_id=loan_id)
-            past_transactions = loan.payment_set.values('date', 'principal', 'interest', 'amount_paid')
-            upcoming_transactions = loan.upcoming_transactions.values('date', 'amount_due')
+            past_transactions = loan.payment_set.values('payment_date', 'amount')
+            upcoming_transactions = Payment.objects.filter(loan=loan, payment_date__gt=timezone.now()).values('payment_date', 'amount')
             return JsonResponse({
                 'past_transactions': list(past_transactions),
                 'upcoming_transactions': list(upcoming_transactions)
             })
-        except Loan.DoesNotExist:
-            return HttpResponseBadRequest('Invalid Loan ID')
+        except Exception as e:
+            return HttpResponseBadRequest(f'Failed to get loan statement: {str(e)}')
+
 
 def home_view(request):
     return render(request, 'home.html')
